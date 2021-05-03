@@ -17,16 +17,17 @@ services:
 
     # depends_on:
     #   - cassandra
-  # frontend:
-  #   container_name: frontend
-  #   build: ./frontend/.
-  #   stdin_open: true
-  #   ports:
-  #     - 3000:3000
-  #   volumes:
-  #     - ./frontend:/app
-  #   command:
-  #     - "npm start"
+  frontend:
+    container_name: frontend
+    build: ./frontend/.
+    stdin_open: true
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/app
+    command: npm start
+    depends_on:
+      - cassandra
   cassandra:
     image: docker.io/bitnami/cassandra:3
     ports:
