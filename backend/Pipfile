@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 cassandra-driver = "*"
 flask = "*"
+flask-cors = "*"
+requests = "*"
 
 [dev-packages]
 
