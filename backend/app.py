@@ -96,6 +96,7 @@ def create_cuentahabiente():
         data = json.loads(request.data.decode("utf-8"))
         cluster = Cluster(['cassandra'], auth_provider=auth_provider)
         connection = cluster.connect(keyspace)
+        print(data)
         resultado = connection.execute("INSERT INTO sist.cuentahabiente (cui, apellido, email, fecha_registro, genero, nombre) VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}');".format(
             data["cui"],
             data["apellido"],
@@ -104,6 +105,7 @@ def create_cuentahabiente():
             data["genero"],
             data["nombre"],
         ))
+        print(resultado)
         return {"status": 201, "payload": {
             "cui": data["cui"],
             "apellido": data["apellido"],

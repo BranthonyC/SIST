@@ -254,7 +254,7 @@ class Home extends React.Component {
 
         {/* begin creación de cuentahabientes */}
         <Panel>
-          <PanelHeader>Crear una nueva entidad financiera</PanelHeader>
+          <PanelHeader>Crear una nuevo cuentahabiente</PanelHeader>
           <PanelBody>
             <form onSubmit={this.crearNuevoCuentahabiente}>
               <div className="form-group row m-b-15">
