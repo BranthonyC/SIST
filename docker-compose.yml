@@ -1,22 +1,16 @@
 version: "2"
 
 services:
-  backend:
-    container_name: flask_app
-    command: flask run --host=0.0.0.0
-    build:
-      backend/.
-      # context: .
-      # dockerfile: backend/Dockerfile
-    ports:
-      - 5000:5000
-    volumes:
-      - ./backend:/code
-    depends_on:
-      - cassandra
-
-    # depends_on:
-    #   - cassandra
+  # backend:
+  #   container_name: flask_app
+  #   command: flask run --host=0.0.0.0
+  #   build: backend/.
+  #   ports:
+  #     - 5000:5000
+  #   volumes:
+  #     - ./backend:/code
+  #   depends_on:
+  #     - cassandra
   frontend:
     container_name: frontend
     build: ./frontend/.
@@ -25,20 +19,20 @@ services:
       - 3000:3000
     volumes:
       - ./frontend:/app
-    command: npm start
-    depends_on:
-      - cassandra
-  cassandra:
-    image: docker.io/bitnami/cassandra:3
-    ports:
-      - "7000:7000"
-      - "9042:9042"
-    volumes:
-      - "cassandra_data:/bitnami"
-    environment:
-      - CASSANDRA_SEEDS=cassandra
-      - CASSANDRA_PASSWORD_SEEDER=yes
-      - CASSANDRA_PASSWORD=cassandra
-volumes:
-  cassandra_data:
-    driver: local
+    command: npm start --HOST=0.0.0.0:3000
+  #   depends_on:
+  #     - cassandra
+  # cassandra:
+  #   image: docker.io/bitnami/cassandra:3
+  #   ports:
+  #     - "7000:7000"
+  #     - "9042:9042"
+  #   volumes:
+  #     - "cassandra_data:/bitnami"
+  #   environment:
+  #     - CASSANDRA_SEEDS=cassandra
+  #     - CASSANDRA_PASSWORD_SEEDER=yes
+  #     - CASSANDRA_PASSWORD=cassandra
+# volumes:
+#   cassandra_data:
+#     driver: local
