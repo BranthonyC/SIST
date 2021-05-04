@@ -5,39 +5,19 @@ import { Panel, PanelHeader, PanelBody } from "../components/panel/panel.jsx";
 
 class Home extends React.Component {
   state = {
+    operaciones_por_cuentahabiente_mes: [],
     operaciones_por_cuentahabiente: [],
     cuentahabientes: [],
   };
 
-  componentDidMount() {
-    axios.get("http://localhost:5000/api/institucion/list").then((res) => {
-      const instituciones_financieras = res.data;
-      this.setState({
-        instituciones_financieras: JSON.parse(
-          instituciones_financieras.payload
-        ),
-      });
-    });
-
-    axios.get("http://localhost:5000/api/cuentahabiente/list").then((res) => {
-      const cuentahabientes = res.data;
-      this.setState({
-        cuentahabientes: JSON.parse(cuentahabientes.payload),
-      });
-    });
-  }
-
   obtenerOperacionesPorCuentahabiente = (e) => {
     e.preventDefault();
-    // let { operaciones_por_cuentahabiente } = this.state;
     let inputs = e.target.getElementsByTagName("input");
     let data = {
       cui: inputs[0].value,
       nombre: inputs[1].value,
       apellido: inputs[2].value,
     };
-    // operaciones_por_cuentahabiente.push(data);
-    // this.setState({ operaciones_por_cuentahabiente: operaciones_por_cuentahabiente });
     axios
       .post(
         "http://localhost:5000/api/reportes/cuentahabiente/operaciones/",
@@ -46,11 +26,6 @@ class Home extends React.Component {
       .then(
         (res) => {
           const operaciones_por_cuentahabiente = res.data;
-          // operaciones_por_cuentahabiente.push(response.data.payload);
-          // this.setState({
-          //   operaciones_por_cuentahabiente: operaciones_por_cuentahabiente,
-          // });
-
           this.setState({
             operaciones_por_cuentahabiente: JSON.parse(
               operaciones_por_cuentahabiente.payload
@@ -63,71 +38,35 @@ class Home extends React.Component {
       );
   };
 
-  // deleteOnClick = (e, nombre, abreviacion) => {
-  //   e.preventDefault();
-  // };
-  eliminarInstitucion = (nombre, abreviacion) => {
-    console.log("Eliminar tal cosa");
-    let { instituciones_financieras } = this.state;
-    let data = {
-      nombre: nombre,
-      abreviacion: abreviacion,
-    };
-    axios.post("http://localhost:5000/api/institucion/delete/", data).then(
-      (response) => {
-        instituciones_financieras.pop(response.data.payload);
-        this.setState({ instituciones_financieras: instituciones_financieras });
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  };
-
-  eliminarCuentahabiente = (cui) => {
-    let { cuentahabientes } = this.state;
-    let data = {
-      cui: cui,
-    };
-    axios.post("http://localhost:5000/api/cuentahabiente/delete/", data).then(
-      (response) => {
-        cuentahabientes.pop(response.data.payload);
-        this.setState({ cuentahabientes: cuentahabientes });
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
-  };
-
-  crearNuevoCuentahabiente = (e) => {
+  obtenerOperacionesPorCuentaHabientePorMes = (e) => {
     e.preventDefault();
-    let { cuentahabientes } = this.state;
+    console.log("POR MES!");
     let inputs = e.target.getElementsByTagName("input");
-    var today = new Date();
-    var dd = String(today.getDate()).padStart(2, "0");
-    var mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-    var yyyy = today.getFullYear();
-    today = yyyy + "-" + mm + "-" + dd;
     let data = {
-      nombre: inputs[0].value,
-      apellido: inputs[1].value,
-      cui: inputs[2].value,
-      genero: inputs[3].value,
-      email: inputs[4].value,
-      fecha_registro: today,
+      cui: inputs[0].value,
+      nombre: inputs[1].value,
+      apellido: inputs[2].value,
+      mes: inputs[3].value,
+      anio: inputs[4].value,
     };
-    // instituciones_financieras.push(data);
-    // this.setState({ instituciones_financieras: instituciones_financieras });
-    axios.post("http://localhost:5000/api/cuentahabiente/create/", data).then(
-      (response) => {
-        cuentahabientes.push(response.data.payload);
-        this.setState({ cuentahabientes: cuentahabientes });
-      },
-      (error) => {
-        console.log(error);
-      }
-    );
+    axios
+      .post(
+        "http://localhost:5000/api/reportes/cuentahabiente/operaciones/mes/",
+        data
+      )
+      .then(
+        (res) => {
+          const operaciones_por_cuentahabiente_mes = res.data;
+          this.setState({
+            operaciones_por_cuentahabiente_mes: JSON.parse(
+              operaciones_por_cuentahabiente_mes.payload
+            ),
+          });
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
   };
 
   render() {
@@ -217,10 +156,106 @@ class Home extends React.Component {
             </table>
           </PanelBody>
         </Panel>
+        {/* Operaciones por cuenta habiente por mes */}
         <Panel>
           <PanelHeader>Movimientos por Cuentahabiente por mes</PanelHeader>
           <PanelBody>
-            <p>Reporte</p>
+            <form onSubmit={this.obtenerOperacionesPorCuentaHabientePorMes}>
+              <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">CUI</label>
+                <div className="col-md-9">
+                  <input
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="3024998490103"
+                    name="cui"
+                  />
+                </div>
+              </div>
+              {/* <!--Begin--> */}
+              <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">Nombre</label>
+                <div className="col-md-9">
+                  <input
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="Nombre"
+                    name="nombre"
+                  />
+                </div>
+              </div>
+              {/* End */}
+              {/* <!--Begin--> */}
+              <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">Apellido</label>
+                <div className="col-md-9">
+                  <input
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="Apellido"
+                    name="apellido"
+                  />
+                </div>
+              </div>
+              {/* End */}
+              {/* <!--Begin--> */}
+              <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">Mes</label>
+                <div className="col-md-9">
+                  <input
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="Mes en numeros"
+                    name="mes"
+                  />
+                </div>
+              </div>
+              {/* End */}
+              {/* <!--Begin--> */}
+              <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">Año</label>
+                <div className="col-md-9">
+                  <input
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="Año en numeros"
+                    name="anio"
+                  />
+                </div>
+              </div>
+              {/* End */}
+              <button className="btn btn-reddit">Consultar operaciones</button>
+            </form>
+            <table className="w-100">
+              <tr>
+                <th>Cui</th>
+                <th>Fecha operación</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Institución</th>
+                <th>Tipo de cuenta</th>
+                <th>Monto Transferido</th>
+              </tr>
+              {this.state.operaciones_por_cuentahabiente_mes.length > 0 ? (
+                this.state.operaciones_por_cuentahabiente_mes.map(
+                  (operacion) => (
+                    <tr key={`${operacion.fecha_operacion}`}>
+                      <td>{operacion.cui}</td>
+                      <td>{operacion.fecha_operacion}</td>
+                      <td>{operacion.nombre}</td>
+                      <td>{operacion.apellido}</td>
+                      <td>{operacion.email}</td>
+                      <td>{operacion.institucion_abr}</td>
+                      <td>{operacion.tipo_cuenta}</td>
+                      <td>{operacion.monto_transferido}</td>
+                    </tr>
+                  )
+                )
+              ) : (
+                <h1>Sin operaciones</h1>
+              )}
+            </table>
           </PanelBody>
         </Panel>
 
