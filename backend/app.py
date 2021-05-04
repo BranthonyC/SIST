@@ -114,3 +114,32 @@ def create_cuentahabiente():
             "genero": data["genero"],
             "nombre": data["nombre"],
         }}
+
+
+@app.route("/api/reportes/cuentahabiente/operaciones/", methods=["POST"])
+def operaciones_por_cuentahabiente():
+    """ Crea un nuevo cuentahabiente en base a los parametros"""
+    if request.method == 'POST':
+        data = json.loads(request.data.decode("utf-8"))
+        cluster = Cluster(['cassandra'], auth_provider=auth_provider)
+        connection = cluster.connect(keyspace)
+        print(data)
+        resultado = connection.execute("SELECT * FROM sist.operaciones_cuentahabiente  WHERE cui = {0} AND nombre = '{1}' AND apellido = '{2}' ALLOW FILTERING".format(
+            data["cui"],
+            data["nombre"],
+            data["apellido"],
+        ))
+        print(resultado)
+        payload = []
+        for response in resultado:
+            payload.append({
+                "cui": response.cui,
+                "nombre": response.nombre,
+                "apellido": response.apellido,
+                "email": response.email,
+                "institucion_abr": response.institucion_abr,
+                "tipo_cuenta": response.tipo_cuenta,
+                "monto_transferido": "{0}".format(response.monto_transferido)
+            })
+        payload = json.dumps(payload)
+        return {"status": 200, "payload": payload}
