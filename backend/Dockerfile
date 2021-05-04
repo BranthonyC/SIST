@@ -1,4 +1,4 @@
-FROM python
+FROM python:3.8
 
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=development

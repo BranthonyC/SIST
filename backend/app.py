@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 import json
@@ -7,6 +8,7 @@ auth_provider = PlainTextAuthProvider(
 keyspace = "sist"
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/")
@@ -26,7 +28,7 @@ def lista_institucion():
         payload.append({"nombre": response.nombre,
                        "abreviacion": response.abreviacion})
     payload = json.dumps(payload)
-    return {"status": 200, payload: payload}
+    return {"status": 200, "payload": payload}
 
 
 @app.route("/api/cuentahabiente/list")
