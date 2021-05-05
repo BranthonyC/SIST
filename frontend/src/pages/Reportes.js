@@ -117,6 +117,10 @@ class Home extends React.Component {
       this.setState({
         operacionesxcuentahbiente: { ...data },
       });
+    } else {
+      this.setState({
+        operacionesxcuentahbiente: { cui: searched_cui },
+      });
     }
   };
 
@@ -172,32 +176,23 @@ class Home extends React.Component {
               {/* Begin testing with dataset */}
               <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">CUI</label>
-                <input
-                  list="CUIS"
-                  name="cui"
-                  className="form-control m-b-5"
-                  id="cui"
-                  onChange={this.handleOnChangeOperacionesPorCuentahabiente}
-                />
-                <datalist id="CUIS">
-                  {this.state.cuentahabientes.map((cuentahabiente) => (
-                    <option value={`${cuentahabiente.cui}`} />
-                  ))}
-                </datalist>
-              </div>
-              {/* End testing with dataset */}
-              {/* <div className="form-group row m-b-15">
-                <label className="col-form-label col-md-3">CUI</label>
                 <div className="col-md-9">
                   <input
-                    type="text"
-                    className="form-control m-b-5"
-                    placeholder="3024998490103"
+                    list="CUIS"
                     name="cui"
+                    className="form-control m-b-5"
+                    id="cui"
+                    placeholder="3024998490103"
+                    onChange={this.handleOnChangeOperacionesPorCuentahabiente}
                     value={this.state.operacionesxcuentahbiente.cui}
                   />
+                  <datalist id="CUIS">
+                    {this.state.cuentahabientes.map((cuentahabiente) => (
+                      <option value={`${cuentahabiente.cui}`} />
+                    ))}
+                  </datalist>
                 </div>
-              </div> */}
+              </div>
               {/* <!--Begin--> */}
               <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">Nombre</label>
@@ -276,11 +271,19 @@ class Home extends React.Component {
                 <label className="col-form-label col-md-3">CUI</label>
                 <div className="col-md-9">
                   <input
-                    type="text"
-                    className="form-control m-b-5"
-                    placeholder="3024998490103"
+                    list="CUIS"
                     name="cui"
+                    className="form-control m-b-5"
+                    id="cui"
+                    placeholder="3024998490103"
+                    onChange={this.handleOnChangeOperacionesPorCuentahabiente}
+                    value={this.state.operacionesxcuentahbiente.cui}
                   />
+                  <datalist id="CUIS">
+                    {this.state.cuentahabientes.map((cuentahabiente) => (
+                      <option value={`${cuentahabiente.cui}`} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
               {/* <!--Begin--> */}
@@ -292,6 +295,7 @@ class Home extends React.Component {
                     className="form-control m-b-5"
                     placeholder="Nombre"
                     name="nombre"
+                    value={this.state.operacionesxcuentahbiente.nombre}
                   />
                 </div>
               </div>
@@ -305,6 +309,7 @@ class Home extends React.Component {
                     className="form-control m-b-5"
                     placeholder="Apellido"
                     name="apellido"
+                    value={this.state.operacionesxcuentahbiente.apellido}
                   />
                 </div>
               </div>
