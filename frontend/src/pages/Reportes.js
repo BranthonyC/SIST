@@ -10,7 +10,28 @@ class Home extends React.Component {
     cuentahabientes: [],
     total_creditos: [],
     total_debitos: [],
+    instituciones_financieras: [],
+    cuentahabientes: [],
+    operacionesxcuentahbiente: { cui: "", nombre: "", apellido: "" },
   };
+
+  componentDidMount() {
+    axios.get("http://localhost:5000/api/institucion/list").then((res) => {
+      const instituciones_financieras = res.data;
+      this.setState({
+        instituciones_financieras: JSON.parse(
+          instituciones_financieras.payload
+        ),
+      });
+    });
+
+    axios.get("http://localhost:5000/api/cuentahabiente/list").then((res) => {
+      const cuentahabientes = res.data;
+      this.setState({
+        cuentahabientes: JSON.parse(cuentahabientes.payload),
+      });
+    });
+  }
 
   obtenerOperacionesPorCuentahabiente = (e) => {
     e.preventDefault();
@@ -20,6 +41,8 @@ class Home extends React.Component {
       nombre: inputs[1].value,
       apellido: inputs[2].value,
     };
+
+    console.log("Consultadndo datos de");
     axios
       .post(
         "http://localhost:5000/api/reportes/cuentahabiente/operaciones/",
@@ -42,7 +65,7 @@ class Home extends React.Component {
 
   obtenerTotalDeCreditosPorInstitucionBancaria = (e) => {
     e.preventDefault();
-    let inputs = e.target.getElementsByTagName("input");
+    let inputs = e.target.getElementsByTagName("select");
     let data = {
       nombre: inputs[0].value,
     };
@@ -61,7 +84,7 @@ class Home extends React.Component {
 
   obtenerTotalDeDebitosPorInstitucionBancaria = (e) => {
     e.preventDefault();
-    let inputs = e.target.getElementsByTagName("input");
+    let inputs = e.target.getElementsByTagName("select");
     let data = {
       nombre: inputs[0].value,
     };
@@ -76,6 +99,25 @@ class Home extends React.Component {
         console.log(error);
       }
     );
+  };
+
+  handleOnChangeOperacionesPorCuentahabiente = (e) => {
+    e.preventDefault();
+    let searched_cui = e.target.value;
+    let result = this.state.cuentahabientes.filter(function (el) {
+      return el.cui == searched_cui;
+    });
+    if (result.length > 0) {
+      let nombre = result[0].nombre;
+      let apellido = result[0].apellido;
+      let cui = result[0].cui;
+      let data = { nombre: nombre, apellido: apellido, cui: cui };
+
+      // console.log(nombre, apellido, cui);
+      this.setState({
+        operacionesxcuentahbiente: { ...data },
+      });
+    }
   };
 
   obtenerOperacionesPorCuentaHabientePorMes = (e) => {
@@ -127,7 +169,24 @@ class Home extends React.Component {
           <PanelHeader>Operaciones por Cuentahabiente</PanelHeader>
           <PanelBody>
             <form onSubmit={this.obtenerOperacionesPorCuentahabiente}>
+              {/* Begin testing with dataset */}
               <div className="form-group row m-b-15">
+                <label className="col-form-label col-md-3">CUI</label>
+                <input
+                  list="CUIS"
+                  name="cui"
+                  className="form-control m-b-5"
+                  id="cui"
+                  onChange={this.handleOnChangeOperacionesPorCuentahabiente}
+                />
+                <datalist id="CUIS">
+                  {this.state.cuentahabientes.map((cuentahabiente) => (
+                    <option value={`${cuentahabiente.cui}`} />
+                  ))}
+                </datalist>
+              </div>
+              {/* End testing with dataset */}
+              {/* <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">CUI</label>
                 <div className="col-md-9">
                   <input
@@ -135,9 +194,10 @@ class Home extends React.Component {
                     className="form-control m-b-5"
                     placeholder="3024998490103"
                     name="cui"
+                    value={this.state.operacionesxcuentahbiente.cui}
                   />
                 </div>
-              </div>
+              </div> */}
               {/* <!--Begin--> */}
               <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">Nombre</label>
@@ -147,6 +207,7 @@ class Home extends React.Component {
                     className="form-control m-b-5"
                     placeholder="Nombre"
                     name="nombre"
+                    value={this.state.operacionesxcuentahbiente.nombre}
                   />
                 </div>
               </div>
@@ -160,6 +221,7 @@ class Home extends React.Component {
                     className="form-control m-b-5"
                     placeholder="Apellido"
                     name="apellido"
+                    value={this.state.operacionesxcuentahbiente.apellido}
                   />
                 </div>
               </div>
@@ -324,12 +386,19 @@ class Home extends React.Component {
               <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">Nombre</label>
                 <div className="col-md-9">
-                  <input
+                  <select
                     type="text"
                     className="form-control m-b-5"
                     placeholder="Nombre"
                     name="nombre"
-                  />
+                  >
+                    <option value="">--Please choose an option--</option>
+                    {this.state.instituciones_financieras.map((institucion) => (
+                      <option value={`${institucion.nombre}`}>
+                        {institucion.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               {/* End */}
@@ -372,12 +441,25 @@ class Home extends React.Component {
               <div className="form-group row m-b-15">
                 <label className="col-form-label col-md-3">Nombre</label>
                 <div className="col-md-9">
-                  <input
+                  {/* <input
                     type="text"
                     className="form-control m-b-5"
                     placeholder="Nombre"
                     name="nombre"
-                  />
+                  /> */}
+                  <select
+                    type="text"
+                    className="form-control m-b-5"
+                    placeholder="Nombre"
+                    name="nombre"
+                  >
+                    <option value="">--Please choose an option--</option>
+                    {this.state.instituciones_financieras.map((institucion) => (
+                      <option value={`${institucion.nombre}`}>
+                        {institucion.nombre}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
               {/* End */}
