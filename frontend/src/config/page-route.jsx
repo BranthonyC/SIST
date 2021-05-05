@@ -4,6 +4,7 @@ import Reportes from "./../pages/Reportes.js";
 import Cuentahabientes from "./../pages/Cuentahabientes.js";
 import InstitucionesFinancieras from "./../pages/InstitucionesFinancieras.js";
 import Login from "./../pages/Login.js";
+import NuevaTransferencia from "./../pages/NuevaTransferencia.js";
 
 const routes = [
   {
@@ -29,6 +30,12 @@ const routes = [
     exact: true,
     title: "Reportes",
     component: () => <Reportes />,
+  },
+  {
+    path: "/nuevatransferencia",
+    exact: true,
+    title: "Nueva Transferencia",
+    component: () => <NuevaTransferencia />,
   },
 ];
 

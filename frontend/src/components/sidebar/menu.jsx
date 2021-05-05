@@ -15,7 +15,7 @@ const Menu = [
     title: "Instituciones Financieras",
   },
   {
-    path: "/dashboard",
+    path: "/nuevatransferencia",
     icon: "fa fa-book",
     title: "Nueva transferencia",
   },

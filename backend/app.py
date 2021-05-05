@@ -219,3 +219,55 @@ def debitos():
         })
     payload = json.dumps(payload)
     return {"status": 200, "payload": payload}
+
+
+@app.route("/api/estado/cuenta/afavor/", methods=["POST"])
+def saldoAFavor():
+    """ Obtiene el saldo a favor del sistema"""
+    data = json.loads(request.data.decode("utf-8"))
+    cluster = Cluster(['cassandra'], auth_provider=auth_provider)
+    connection = cluster.connect(keyspace)
+    resultado = connection.execute(
+        """ select SUM(monto_transferido) as a_favor from movimientos_cuentahabiente_por_cuenta
+            where cui={0}
+            and nombre = '{1}'
+            and apellido = '{2}'
+            and institucion_abr ='{3}'
+            and tipo_cuenta = '{4}'
+            and tipo_operacion = 'credito';
+        """.format(
+            data["cui"],
+            data["nombre"],
+            data["apellido"],
+            data["abreviacion"],
+            data["tipo_cuenta"]
+        )
+    )
+
+    credito = 0
+    for response in resultado:
+        credito = response.a_favor
+
+    resultado = connection.execute(
+        """ select SUM(monto_transferido) as en_contra from movimientos_cuentahabiente_por_cuenta
+            where cui={0}
+            and nombre = '{1}'
+            and apellido = '{2}'
+            and institucion_abr ='{3}'
+            and tipo_cuenta = '{4}'
+            and tipo_operacion = 'debito';
+        """.format(
+            data["cui"],
+            data["nombre"],
+            data["apellido"],
+            data["abreviacion"],
+            data["tipo_cuenta"]
+        )
+    )
+
+    debito = 0
+    for response in resultado:
+        debito = response.en_contra
+
+    resultado = "{0}".format(credito - debito)
+    return {"status": 200, "payload": resultado}
