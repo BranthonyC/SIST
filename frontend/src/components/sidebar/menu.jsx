@@ -1,8 +1,8 @@
 const Menu = [
   {
-    path: "/",
-    icon: "fa fa-th",
-    title: "Home",
+    path: "/dashboard",
+    icon: "fa fa-bell",
+    title: "Reportes",
   },
   {
     path: "/cuentahabientes",
@@ -15,9 +15,9 @@ const Menu = [
     title: "Instituciones Financieras",
   },
   {
-    path: "/reportes",
-    icon: "fa fa-bell",
-    title: "Reportes",
+    path: "/dashboard",
+    icon: "fa fa-book",
+    title: "Nueva transferencia",
   },
 ];
 

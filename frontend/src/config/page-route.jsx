@@ -3,13 +3,14 @@ import Home from "./../pages/Home.js";
 import Reportes from "./../pages/Reportes.js";
 import Cuentahabientes from "./../pages/Cuentahabientes.js";
 import InstitucionesFinancieras from "./../pages/InstitucionesFinancieras.js";
+import Login from "./../pages/Login.js";
 
 const routes = [
   {
     path: "/",
     exact: true,
-    title: "Home",
-    component: () => <Home />,
+    title: "Login",
+    component: () => <Login />,
   },
   {
     path: "/cuentahabientes",
@@ -24,7 +25,7 @@ const routes = [
     component: () => <InstitucionesFinancieras />,
   },
   {
-    path: "/reportes",
+    path: "/dashboard",
     exact: true,
     title: "Reportes",
     component: () => <Reportes />,

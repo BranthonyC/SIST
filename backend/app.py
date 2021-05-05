@@ -175,3 +175,47 @@ def operaciones_por_cuentahabiente_mes():
             })
         payload = json.dumps(payload)
         return {"status": 200, "payload": payload}
+
+
+@app.route("/api/reportes/creditos/", methods=["POST"])
+def creditos():
+    """ Obtiene el total de creditos dada una insitución bancaria """
+    data = json.loads(request.data.decode("utf-8"))
+    cluster = Cluster(['cassandra'], auth_provider=auth_provider)
+    connection = cluster.connect(keyspace)
+    resultado = connection.execute(
+        "select SUM(monto) as total_creditos , COUNT(*) as total_operaciones from sist.totales_creditos_debitos_institucion  where nombre = '{0}' and tipo_operacion ='credito' allow filtering".format(
+            data["nombre"]
+        )
+    )
+
+    payload = []
+    for response in resultado:
+        payload.append({
+            "total_creditos": "{0}".format(response.total_creditos),
+            "total_operaciones": "{0}".format(response.total_operaciones),
+        })
+    payload = json.dumps(payload)
+    return {"status": 200, "payload": payload}
+
+
+@app.route("/api/reportes/debitos/", methods=["POST"])
+def debitos():
+    """ Obtiene el total de debitos dada una insitución bancaria """
+    data = json.loads(request.data.decode("utf-8"))
+    cluster = Cluster(['cassandra'], auth_provider=auth_provider)
+    connection = cluster.connect(keyspace)
+    resultado = connection.execute(
+        "select SUM(monto) as total_debitos , COUNT(*) as total_operaciones from sist.totales_creditos_debitos_institucion  where nombre = '{0}' and tipo_operacion ='debito' allow filtering".format(
+            data["nombre"]
+        )
+    )
+
+    payload = []
+    for response in resultado:
+        payload.append({
+            "total_debitos": "{0}".format(response.total_debitos),
+            "total_operaciones": "{0}".format(response.total_operaciones),
+        })
+    payload = json.dumps(payload)
+    return {"status": 200, "payload": payload}
