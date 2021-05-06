@@ -27,9 +27,11 @@ class Cuentahabientes extends React.Component {
       (response) => {
         cuentahabientes.pop(response.data.payload);
         this.setState({ cuentahabientes: cuentahabientes });
+        alert("Eliminado con exito");
       },
       (error) => {
         console.log(error);
+        alert("Error al eliminar");
       }
     );
   };
@@ -57,9 +59,11 @@ class Cuentahabientes extends React.Component {
       (response) => {
         cuentahabientes.push(response.data.payload);
         this.setState({ cuentahabientes: cuentahabientes });
+        alert("Creado con exito");
       },
       (error) => {
         console.log(error);
+        alert("Error al eliminar");
       }
     );
   };

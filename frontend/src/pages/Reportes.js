@@ -353,6 +353,7 @@ class Home extends React.Component {
                     <th>Email</th>
                     <th>Institución</th>
                     <th>Tipo de cuenta</th>
+                    <th>Tipo Operacion</th>
                     <th>Monto Transferido</th>
                   </tr>
                   {this.state.operaciones_por_cuentahabiente_mes.length > 0 ? (
@@ -366,6 +367,7 @@ class Home extends React.Component {
                           <td>{operacion.email}</td>
                           <td>{operacion.institucion_abr}</td>
                           <td>{operacion.tipo_cuenta}</td>
+                          <td>{operacion.tipo_operacion}</td>
                           <td>{operacion.monto_transferido}</td>
                         </tr>
                       )

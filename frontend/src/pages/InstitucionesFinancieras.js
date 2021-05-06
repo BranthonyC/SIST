@@ -34,9 +34,11 @@ class Home extends React.Component {
       (response) => {
         instituciones_financieras.push(response.data.payload);
         this.setState({ instituciones_financieras: instituciones_financieras });
+        alert("Institución registrada con exito");
       },
       (error) => {
         console.log(error);
+        alert("Error al crear, intenta de nuevo más tarde.");
       }
     );
   };
@@ -55,9 +57,11 @@ class Home extends React.Component {
       (response) => {
         instituciones_financieras.pop(response.data.payload);
         this.setState({ instituciones_financieras: instituciones_financieras });
+        alert("Eliminado con exito");
       },
       (error) => {
         console.log(error);
+        alert("Intenta de nuevo más tarde");
       }
     );
   };

@@ -321,6 +321,23 @@ class Home extends React.Component {
     console.log("Cuenta de destino");
     console.log(this.state.cuenta_destino);
     console.log("Monto transferido");
+
+    axios
+      .post("http://localhost:5000/api/nueva/transferencia/", {
+        origen: { ...this.state.cuenta_origen },
+        destino: { ...this.state.cuenta_destino },
+        monto_transferido: this.state.monto_transferido,
+      })
+      .then(
+        (res) => {
+          console.log(res);
+          alert("Transferencia exitosa");
+        },
+        (error) => {
+          alert("Transferencia fallida, intente de nuevo más tarde");
+          console.log(error);
+        }
+      );
   };
 
   render() {

@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
+from datetime import datetime
 from flask import request
 import json
 auth_provider = PlainTextAuthProvider(
@@ -97,7 +98,7 @@ def create_cuentahabiente():
         cluster = Cluster(['cassandra'], auth_provider=auth_provider)
         connection = cluster.connect(keyspace)
         print(data)
-        resultado = connection.execute("INSERT INTO sist.cuentahabiente (cui, apellido, email, fecha_registro, genero, nombre) VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}');".format(
+        resultado = connection.execute("INSERT INTO sist.cuentahabiente (cui, apellido, email, fecha_registro, genero, nombre) VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}')".format(
             data["cui"],
             data["apellido"],
             data["email"],
@@ -171,7 +172,9 @@ def operaciones_por_cuentahabiente_mes():
                 "email": response.email,
                 "institucion_abr": response.institucion_abr,
                 "tipo_cuenta": response.tipo_cuenta,
-                "monto_transferido": "{0}".format(response.monto_transferido)
+                "monto_transferido": "{0}".format(response.monto_transferido),
+                "tipo_operacion": response.tipo_operacion,
+                "fecha_operacion": "{0}".format(response.fecha_operacion)
             })
         payload = json.dumps(payload)
         return {"status": 200, "payload": payload}
@@ -272,3 +275,149 @@ def saldoAFavor():
 
     resultado = "{0}".format(credito - debito)
     return {"status": 200, "payload": resultado}
+
+
+@app.route("/api/nueva/transferencia/", methods=["POST"])
+def registrarNuevaTransferencia():
+    """ Obtiene el total de debitos dada una insitución bancaria """
+    data = json.loads(request.data.decode("utf-8"))
+    cluster = Cluster(['cassandra'], auth_provider=auth_provider)
+    connection = cluster.connect(keyspace)
+    data_origen = data["origen"]
+    data_destino = data["destino"]
+    resultado = connection.execute(
+        """ INSERT INTO sist.operaciones_cuentahabiente
+            (cui, fecha_operacion, apellido, email, fecha_registro, institucion_abr, institucion_nombre, monto_transferido, nombre, tipo_cuenta)
+            VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', {7}, '{8}', '{9}');
+        """.format(
+            data_origen["cui"],
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_origen["apellido"],
+            data_origen["email"],
+            data_origen["fecha_registro"],
+            data_origen["abreviacion"],
+            data_origen["institucion_nombre"],
+            data["monto_transferido"],
+            data_origen["nombre"],
+            data_origen["tipo_cuenta"]
+        )
+    )
+
+    query = """
+        INSERT INTO sist.movimientos_cuentahabiente_por_cuenta
+        (cui, nombre, apellido, institucion_abr, tipo_cuenta, tipo_operacion, fecha_operacion, email, fecha_registro, institucion_nombre, monto_transferido)
+        VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', {10});
+        """
+    print(data_origen)
+    resultado = connection.execute(
+        query.format(
+            data_origen["cui"],
+            data_origen["nombre"],
+            data_origen["apellido"],
+            data_origen["abreviacion"],
+            data_origen["tipo_cuenta"],
+            "debito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_origen["email"],
+            data_origen["fecha_registro"],
+            data_origen["institucion_nombre"],
+            data["monto_transferido"],
+        )
+    )
+
+    resultado = connection.execute(
+        query.format(
+            data_destino["cui"],
+            data_destino["nombre"],
+            data_destino["apellido"],
+            data_destino["abreviacion"],
+            data_destino["tipo_cuenta"],
+            "credito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_destino["email"],
+            data_destino["fecha_registro"],
+            data_destino["institucion_nombre"],
+            data["monto_transferido"],
+        )
+    )
+
+    query = """
+        INSERT INTO sist.movimientos_cuentahabiente_por_cuenta
+        (cui, nombre, apellido, institucion_abr, tipo_cuenta, tipo_operacion, fecha_operacion, email, fecha_registro, institucion_nombre, monto_transferido)
+        VALUES({0}, '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}', '{9}', {10})
+        """
+    resultado = connection.execute(
+        query.format(
+            data_origen["cui"],
+            data_origen["nombre"],
+            data_origen["apellido"],
+            data_origen["abreviacion"],
+            data_origen["tipo_cuenta"],
+            "debito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_origen["email"],
+            data_origen["fecha_registro"],
+            data_origen["institucion_nombre"],
+            data["monto_transferido"],
+        )
+    )
+
+    resultado = connection.execute(
+        query.format(
+            data_destino["cui"],
+            data_destino["nombre"],
+            data_destino["apellido"],
+            data_destino["abreviacion"],
+            data_destino["tipo_cuenta"],
+            "credito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data_destino["email"],
+            data_destino["fecha_registro"],
+            data_destino["institucion_nombre"],
+            data["monto_transferido"],
+        )
+    )
+
+    query = """
+        INSERT INTO sist.movimientos_cuentahabiente_mes
+        (cui, nombre, apellido, mes, anio, fecha_operacion, tipo_operacion, email, fecha_registro, institucion_abr, institucion_nombre, monto_transferido, tipo_cuenta)
+        VALUES({0}, '{1}', '{2}', {3}, {4}, '{5}', '{6}', '{7}', '{8}', '{9}', '{10}', {11}, '{12}')
+    """
+
+    resultado = connection.execute(
+        query.format(
+            data_origen["cui"],
+            data_origen["nombre"],
+            data_origen["apellido"],
+            datetime.now().month,
+            datetime.now().year,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "debito",
+            data_origen["email"],
+            data_origen["fecha_registro"],
+            data_origen["abreviacion"],
+            data_origen["institucion_nombre"],
+            data["monto_transferido"],
+            data_origen["tipo_cuenta"],
+        )
+    )
+
+    resultado = connection.execute(
+        query.format(
+            data_destino["cui"],
+            data_destino["nombre"],
+            data_destino["apellido"],
+            datetime.now().month,
+            datetime.now().year,
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "debito",
+            data_destino["email"],
+            data_destino["fecha_registro"],
+            data_destino["abreviacion"],
+            data_destino["institucion_nombre"],
+            data["monto_transferido"],
+            data_destino["tipo_cuenta"]
+        )
+    )
+
+    return {"status": 200, "payload": "ok"}
