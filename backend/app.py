@@ -420,4 +420,27 @@ def registrarNuevaTransferencia():
         )
     )
 
+    query = """ 
+    INSERT INTO sist.totales_creditos_debitos_institucion
+    (nombre, tipo_operacion, fecha_operacion, monto)
+    VALUES('{0}', '{1}', '{2}', {3});
+    """
+    resultado = connection.execute(
+        query.format(
+            data_origen["institucion_nombre"],
+            "debito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data["monto_transferido"],
+        )
+    )
+
+    resultado = connection.execute(
+        query.format(
+            data_destino["institucion_nombre"],
+            "credito",
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            data["monto_transferido"],
+        )
+    )
+
     return {"status": 200, "payload": "ok"}
