@@ -227,6 +227,7 @@ def saldoAFavor():
     data = json.loads(request.data.decode("utf-8"))
     cluster = Cluster(['cassandra'], auth_provider=auth_provider)
     connection = cluster.connect(keyspace)
+    print(data)
     resultado = connection.execute(
         """ select SUM(monto_transferido) as a_favor from movimientos_cuentahabiente_por_cuenta
             where cui={0}

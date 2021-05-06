@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { Panel, PanelHeader, PanelBody } from "../components/panel/panel.jsx";
+import { string } from "prop-types";
 
 class Home extends React.Component {
   state = {
@@ -18,6 +19,8 @@ class Home extends React.Component {
       apellido: "",
       tipo_cuenta: "",
       abreviacion: "",
+      institucion_nombre: "",
+      email: "",
     },
     cuenta_destino: {
       cui: "",
@@ -25,6 +28,8 @@ class Home extends React.Component {
       apellido: "",
       tipo_cuenta: "",
       abreviacion: "",
+      institucion_nombre: "",
+      email: "",
     },
     saldo_disponible: 0.0,
     monto_transferido: 0.0,
@@ -47,11 +52,6 @@ class Home extends React.Component {
       });
     });
   }
-
-  handleOnChangeCuiCuentaDestino = (e) => {
-    e.preventDefault();
-    console.log(e.target.value);
-  };
 
   obtenerOperacionesPorCuentahabiente = (e) => {
     e.preventDefault();
@@ -90,6 +90,25 @@ class Home extends React.Component {
 
   handleCuentaOrigenChange = (e) => {
     e.preventDefault();
+    let bank = { nombre: "", abreviacion: "" };
+    let abreviacion = e.target.value;
+    if ([e.target.name] == "abreviacion") {
+      bank = this.state.instituciones_financieras.filter(function (el) {
+        return el.abreviacion === e.target.value;
+      })[0];
+
+      if (bank) {
+        this.setState({
+          cuenta_origen: {
+            ...this.state.cuenta_origen,
+            abreviacion: abreviacion,
+            institucion_nombre: bank.nombre,
+          },
+        });
+      }
+      return;
+    }
+
     this.setState(
       {
         cuenta_origen: {
@@ -98,8 +117,13 @@ class Home extends React.Component {
         },
       },
       function () {
-        console.log("Hacer una trasnferencia a ");
-        console.log(this.state.cuenta_origen);
+        /*Actualiza el tipo de cuenta a la cual sera acreditado*/
+        this.setState({
+          cuenta_destino: {
+            ...this.state.cuenta_destino,
+            tipo_cuenta: e.target.value,
+          },
+        });
         if (this.state.cuenta_origen.tipo_cuenta) {
           axios
             .post(
@@ -114,6 +138,33 @@ class Home extends React.Component {
         }
       }
     );
+  };
+
+  handleCuentaDestinoChange = (e) => {
+    e.preventDefault();
+    let bank = { nombre: "", abreviacion: "" };
+    if ([e.target.name] == "abreviacion") {
+      bank = this.state.instituciones_financieras.filter(function (el) {
+        return el.abreviacion === e.target.value;
+      })[0];
+
+      if (bank) {
+        this.setState({
+          cuenta_destino: {
+            ...this.state.cuenta_destino,
+            [e.target.name]: e.target.value,
+            institucion_nombre: bank.nombre,
+          },
+        });
+      }
+      return;
+    }
+    this.setState({
+      cuenta_destino: {
+        ...this.state.cuenta_destino,
+        [e.target.name]: e.target.value,
+      },
+    });
   };
 
   obtenerTotalDeCreditosPorInstitucionBancaria = (e) => {
@@ -154,7 +205,7 @@ class Home extends React.Component {
     );
   };
 
-  handleOnChangeOperacionesPorCuentahabiente = (e) => {
+  handleOnChangeCuiCuentaOrigen = (e) => {
     e.preventDefault();
     let searched_cui = e.target.value;
     let result = this.state.cuentahabientes.filter(function (el) {
@@ -164,15 +215,55 @@ class Home extends React.Component {
       let nombre = result[0].nombre;
       let apellido = result[0].apellido;
       let cui = result[0].cui;
-      let data = { nombre: nombre, apellido: apellido, cui: cui };
+      let email = result[0].email;
+      let fecha_registro = result[0].fecha_registro;
+      let data = {
+        nombre: nombre,
+        apellido: apellido,
+        cui: cui,
+        email: email,
+        fecha_registro: fecha_registro,
+      };
 
       // console.log(nombre, apellido, cui);
       this.setState({
-        cuenta_origen: { ...data },
+        cuenta_origen: { ...this.state.cuenta_origen, ...data },
       });
     } else {
       this.setState({
-        cuenta_origen: { cui: searched_cui },
+        cuenta_origen: { ...this.state.cuenta_origen, cui: searched_cui },
+      });
+    }
+  };
+
+  handleOnChangeCuiCuentaDestino = (e) => {
+    e.preventDefault();
+    let searched_cui = e.target.value;
+    let result = this.state.cuentahabientes.filter(function (el) {
+      return el.cui == searched_cui;
+    });
+    if (result.length > 0) {
+      console.log(result[0]);
+      let nombre = result[0].nombre;
+      let apellido = result[0].apellido;
+      let cui = result[0].cui;
+      let email = result[0].email;
+      let fecha_registro = result[0].fecha_registro;
+      let data = {
+        nombre: nombre,
+        apellido: apellido,
+        cui: cui,
+        email: email,
+        fecha_registro: fecha_registro,
+      };
+
+      // console.log(nombre, apellido, cui);
+      this.setState({
+        cuenta_destino: { ...this.state.cuenta_destino, ...data },
+      });
+    } else {
+      this.setState({
+        cuenta_destino: { ...this.state.cuenta_destino, cui: searched_cui },
       });
     }
   };
@@ -225,7 +316,11 @@ class Home extends React.Component {
 
   realizarTransferencia = (e) => {
     e.preventDefault();
+    console.log("Cuenta de origen");
     console.log(this.state.cuenta_origen);
+    console.log("Cuenta de destino");
+    console.log(this.state.cuenta_destino);
+    console.log("Monto transferido");
   };
 
   render() {
@@ -268,9 +363,7 @@ class Home extends React.Component {
                             className="form-control m-b-5"
                             id="cui"
                             placeholder="3024998490103"
-                            onChange={
-                              this.handleOnChangeOperacionesPorCuentahabiente
-                            }
+                            onChange={this.handleOnChangeCuiCuentaOrigen}
                             value={this.state.cuenta_origen.cui}
                           />
                           <datalist id="CUIS">
@@ -314,6 +407,21 @@ class Home extends React.Component {
                         </div>
                       </div>
                       {/* End */}
+                      <div
+                        className="form-group row m-b-15 vissually-hidden"
+                        aria-hidden="true"
+                      >
+                        <label className="col-form-label col-md-3">Email</label>
+                        <div className="col-md-9">
+                          <input
+                            type="text"
+                            className="form-control m-b-5"
+                            placeholder="Apellido"
+                            name="email"
+                            value={this.state.cuenta_origen.email}
+                          />
+                        </div>
+                      </div>
                       {/* <!--Begin--> */}
                       <div className="form-group row m-b-15">
                         <label className="col-form-label col-md-3">Banco</label>
@@ -324,7 +432,7 @@ class Home extends React.Component {
                             className="form-control m-b-5"
                             placeholder="G&T"
                             onChange={this.handleCuentaOrigenChange}
-                            value={this.state.cuenta_origen.abreviacion}
+                            // value={this.state.cuenta_origen.abreviacion}
                           />
                           <datalist id="tipo_cuentas">
                             {this.state.instituciones_financieras.map(
@@ -362,7 +470,12 @@ class Home extends React.Component {
                     <div className="col"></div>
                     {/* Col 6 */}
                     <div className="col-5">
-                      <h3>Cuenta destino: {this.state.monto_transferido}</h3>
+                      <h3>
+                        Cuenta destino:{" "}
+                        <strong className="text-warning">
+                          +{this.state.monto_transferido}
+                        </strong>
+                      </h3>
 
                       <div className="form-group row m-b-15">
                         <label className="col-form-label col-md-3">
@@ -416,6 +529,65 @@ class Home extends React.Component {
                           />
                         </div>
                       </div>
+                      <div
+                        className="form-group row m-b-15 vissually-hidden"
+                        aria-hidden="true"
+                      >
+                        <label className="col-form-label col-md-3">Email</label>
+                        <div className="col-md-9">
+                          <input
+                            type="text"
+                            className="form-control m-b-5"
+                            placeholder="Apellido"
+                            name="email"
+                            value={this.state.cuenta_destino.email}
+                          />
+                        </div>
+                      </div>
+                      {/* <!--Begin--> */}
+                      <div className="form-group row m-b-15">
+                        <label className="col-form-label col-md-3">Banco</label>
+                        <div className="col-md-9">
+                          <input
+                            list="tipo_cuentas"
+                            name="abreviacion"
+                            className="form-control m-b-5"
+                            placeholder="G&T"
+                            onChange={this.handleCuentaDestinoChange}
+                            // value={this.state.cuenta_destino.abreviacion}
+                          />
+                          <datalist id="tipo_cuentas">
+                            {this.state.instituciones_financieras.map(
+                              (banco) => (
+                                <option value={`${banco.abreviacion}`} />
+                              )
+                            )}
+                          </datalist>
+                        </div>
+                      </div>
+                      {/* End */}
+                      {/* <!--Begin--> */}
+                      <div className="form-group row m-b-15">
+                        <label className="col-form-label col-md-3">
+                          Tipo de cuenta
+                        </label>
+                        <div className="col-md-9">
+                          <input
+                            list="tipo_cuentas"
+                            name="tipo_cuenta"
+                            className="form-control m-b-5"
+                            placeholder="Monetaria en Q"
+                            onChange={this.handleCuentaDestinoChange}
+                            value={this.state.cuenta_destino.tipo_cuenta}
+                          />
+                          <datalist id="tipo_cuentas">
+                            <option value="Monetaria en $" />
+                            <option value="Monetaria en Q" />
+                            <option value="Ahorro" />
+                          </datalist>
+                        </div>
+                      </div>
+                      {/* End */}
                     </div>
 
                     <div className="col"></div>
@@ -431,8 +603,7 @@ class Home extends React.Component {
                           <input
                             name="monto_transferido"
                             className="form-control m-b-5"
-                            id="cui"
-                            placeholder="3024998490103"
+                            placeholder="0"
                             onChange={this.handleMontoATrasnferirChange}
                             value={this.state.monto_transferir}
                             type="number"
@@ -442,7 +613,7 @@ class Home extends React.Component {
                         </div>
                       </div>
 
-                      {this.state.saldo_disponible >
+                      {parseInt(this.state.saldo_disponible) >
                       this.state.monto_transferido ? (
                         <button className="btn btn-primary">
                           Realizar trasnferencia
